@@ -1,14 +1,9 @@
 import csv
 from openpyxl import load_workbook
 import pandas as pd
-<<<<<<< HEAD
 import sys
 sys.path.extend(('C:\\Python34\\lib\\site-packages\\win32', 'C:\\Python34\\lib\\site-packages\\win32\\lib', 'C:\\Python34\\lib\\site-packages\\Pythonwin'))
 import xlwings as xw
-=======
-import datetime
-import xlrd
->>>>>>> c42659cae65279ec03fef9cdc6267c92df98e0f5
 
 class INDICATORRESULTS():
     def main():
@@ -25,7 +20,6 @@ class INDICATORRESULTS():
 
         xls_file = pd.ExcelFile('..\data-source.xlsx')
         df = xls_file.parse('Sheet1')
-<<<<<<< HEAD
 
         facility = 'MM1030'
         
@@ -114,22 +108,6 @@ class INDICATORRESULTS():
             filewriter.writerow(['MM1030 2014', val6])
 
         print('\nresult file created\n')
-=======
-        value_list = ['MM1030']
-        df[df.isin(value_list)]
-
-        # what does this code do
-        #colValues = {}
-        #for row in ws2.iter_rows(min_row=3, max_col=1, max_row=25):
-        #    for cell in row:
-        #        colValues[cell] = cell.value         
-
-        with open('..\strategie-results.csv', 'w', newline='') as csvfile:
-            filewriter = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)       
-        
-        print('result file created\n')
->>>>>>> c42659cae65279ec03fef9cdc6267c92df98e0f5
 
 
     if __name__ == "__main__": main()
