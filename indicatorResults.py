@@ -1,5 +1,8 @@
 import csv
 from openpyxl import load_workbook
+import pandas as pd
+import datetime
+import xlrd
 
 class INDICATORRESULTS():
     def main():
@@ -13,23 +16,20 @@ class INDICATORRESULTS():
 
         sheet_ranges = wb2['Indicators']
 
-        colValues = {}
-        for row in ws2.iter_rows(min_row=3, max_col=1, max_row=25):
-            for cell in row:
-                colValues[cell] = cell.value
+        xls_file = pd.ExcelFile('..\data-source.xlsx')
+        df = xls_file.parse('Sheet1')
+        value_list = ['MM1030']
+        df[df.isin(value_list)]
 
-        for cols in ws1:
-            for cell in cols:
-                if cell.value == "Date":
-                    print(cell.value)
-            
+        # what does this code do
+        #colValues = {}
+        #for row in ws2.iter_rows(min_row=3, max_col=1, max_row=25):
+        #    for cell in row:
+        #        colValues[cell] = cell.value         
 
         with open('..\strategie-results.csv', 'w', newline='') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
-
-
-        
+                                    quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)       
         
         print('result file created\n')
 
