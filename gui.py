@@ -1,7 +1,12 @@
+# pour créer un executable Windows qui marche http://www.pyinstaller.org/
+
+# TO BE IMPLEMENTED
+    # sélection du time span (année de départ, année de fin, temporalité)
+
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from tkinter import *
-import sys
+from indicatorResults import INDICATORRESULTS as ir
 
 class Window:
 	# crée la structure et les objets de l'UI
@@ -31,7 +36,7 @@ class Window:
 		self.bar4=Entry(master)
 		self.bar4.grid(row=4, column=2, sticky = W + E, padx = 10, columnspan = 2)
 		
-		# l'antépénultième vraie ligne, pour displayer le message d'erreur
+		# l'antépénultième ligne, pour displayer le message d'erreur
 		self.status=Label(root, text="", fg = "red")
 		self.status.grid(row=9, column=1, columnspan=3)
 		
@@ -45,7 +50,7 @@ class Window:
 		root.grid_rowconfigure(0, minsize=10)
 		root.grid_rowconfigure(11, minsize=10)
 		
-		#et enfin une petite touche d'interactivité pour nos amis les gens qui en ont marre de leur trackpack
+		#et enfin une petite touche d'interactivité pour nos amis les gens qui en ont marre de leur trackpad
 		root.bind('<Return>', lambda e: self.process_strategies())
 		
 
@@ -68,7 +73,6 @@ class Window:
 		return pathlist[-1]
 		
 	# fonction lancée quand on clique sur OK (c'est là qu'on veut mettre notre code mais on peut aussi juste appeler ton code à partir de là)
-	# PLACEHOLDER A COMPLETER, du coup
 	def process_strategies(self):
 		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""):
 			self.status.config(text="Please fill in required fields (i.e, all of them).")
@@ -82,11 +86,12 @@ class Window:
 		else:
 			print("Data source file path: ",self.filenames[0])
 			print("Indicator file path: ",self.filenames[1])
+			
+			newfilename = self.bar4.get()
 			if (self.bar4.get().split('.')[-1] != "csv" or len(self.bar4.get().split('.')) == 1):
-				print("Strategies file name:",self.bar4.get() + ".csv")
-			else:
-				print("Strategies file name:",self.bar4.get())
-			sys.exit()
+				newfilename = newfilename + ".csv"
+			
+			return ir().main(self.filenames[0], self.filenames[1], newfilename, 2009, 2014, 'year')
 
 root = Tk()
 root.title("Evalution Strategies Processor")
