@@ -3,6 +3,17 @@
     # sélection de la liste des attributs
     # boucle principale
     # indépendance des variances de fichiers source / indicateur (noms de fichiers, nom de colonnes)
+    
+# ASSUMPTIONS (to be confirmed / corrected)
+    # le nom de la colonne des dates est toujours 'EEM Water Qual Mon Date'
+    
+# PREREQUISITES (à noter quelque part / intégrer dans l'user interface / etc. ou demander confirmation)
+    # about the DATA SOURCE
+        # the headers must be in the first row
+        # all attributes must be in columns AFTER the date column, all other data BEFORE the date column
+        # the name of the date column MUST be 'EEM Water Qual Mon Date'
+    # about the INDICATOR TEMPLATE
+        # the names of the attributes in this list must match the names of the attributes in the source file
 
 import csv
 from openpyxl import load_workbook
@@ -10,13 +21,31 @@ import pandas as pd
 import sys
 sys.path.extend(('C:\\Python34\\lib\\site-packages\\win32', 'C:\\Python34\\lib\\site-packages\\win32\\lib', 'C:\\Python34\\lib\\site-packages\\Pythonwin'))
 import xlwings as xw
+import datetime as dt
 
 class INDICATORRESULTS():
     # doit pouvoir générer une liste des couples de dates de l'année de départ à l'année de fin en fonction de la périodicité 
     def get_delimitation_dates(self, startYear, endYear, timespan):
+        current = dt.date(startYear, 1, 1)
+        
+        #for yyyy in range(startYear, endYear+1):
+        
+        if (timespan == 'year'):
+            print(timespan)
+        elif (timespan == 'semester'):
+            print(timespan)
+        elif (timespan == 'trimester'):
+            print(timespan)
+        elif (timespan == 'month'):
+            print(timespan)
+        elif (timespan == 'day'):
+            print(timespan)
+        else:
+            print("Not implemented.")
         return [['2009-01-01', '2009-12-31'], ['2010-01-01', '2010-12-31'], ['2011-01-01', '2011-12-31'], ['2012-01-01', '2012-12-31'], ['2013-01-01', '2013-12-31'], ['2014-01-01', '2014-12-31']]
     
     def main_loop(self, source, indicator, results, dates):
+        return 0
         # boucle extérieure : par facility
         # boucle intérieure : par période
         
@@ -32,6 +61,11 @@ class INDICATORRESULTS():
 
         # gets all facility names
         facility = pd.unique(df['Facility Name'])
+        #print('Facilities:', facility, '\n')
+        
+        # gets all attribute names
+        attributes = list(df)[list(df).index('EEM Water Qual Mon Date')+1:]
+        #print('Attributes:',attributes, '\n')
         
         dates = self.get_delimitation_dates(startYear, endYear, timespan)
         
