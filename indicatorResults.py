@@ -44,17 +44,15 @@ class INDICATORRESULTS():
 		
 		dates_array = [[current.isoformat()]]
 		i = 0
-		while current.year < endYear:
-			print("Date", i, "=", current.isoformat())
+		while current.year <= endYear:
 			current = current + date_increment
 			dates_array[i].append((current - relativedelta(days=1)).isoformat())
 			dates_array.append([current.isoformat()])
 			i = i + 1
-		dates_array[i].append((current - relativedelta(days=1)).isoformat())
 			
-		print('\nDates array:',dates_array, '\n')
+		del dates_array[-1]
 		
-		return dates_array # [['2009-01-01', '2009-12-31'], ['2010-01-01', '2010-12-31'], ['2011-01-01', '2011-12-31'], ['2012-01-01', '2012-12-31'], ['2013-01-01', '2013-12-31'], ['2014-01-01', '2014-12-31']]
+		return dates_array
 	
 	def main_loop(self, source, indicator, results, dates):
 		return 0
