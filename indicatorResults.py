@@ -1,11 +1,6 @@
 # TO BE IMPLEMENTED
-	# sélection de la période
-	# sélection de la liste des attributs
 	# boucle principale
 	# indépendance des variances de fichiers source / indicateur (noms de fichiers, nom de colonnes)
-	
-# ASSUMPTIONS (to be confirmed / corrected)
-	# le nom de la colonne des dates est toujours 'EEM Water Qual Mon Date'
 	
 # PREREQUISITES (à noter quelque part / intégrer dans l'user interface / etc. ou demander confirmation)
 	# about the DATA SOURCE
@@ -69,13 +64,20 @@ class INDICATORRESULTS():
 		wb2 = load_workbook(filename = indicator)
 		ws2 = wb2.active
 
-		# gets all facility names
 		facility = pd.unique(df['Facility Name'])
-		#print('Facilities:', facility, '\n')
 		
-		# gets all attribute names
-		attributes = list(df)[list(df).index('EEM Water Qual Mon Date')+1:]
-		#print('Attributes:',attributes, '\n')
+		attributes_src = list(df)[list(df).index('EEM Water Qual Mon Date')+1:]
+		attributes_ind = []
+		for i in ws2:
+			attributes_ind.append([i[0].value,i[0].coordinate,0])
+		attributes_ind.remove(['Indicators','A1', 0])
+		attributes_ind.remove(['Name','A2', 0])
+		print("Attributes list (source side):", attributes_src)
+		print("\nAttributes list (indicator side):", [i[0] for i in attributes_ind])
+		
+		attributes = list(set(attributes_src) & set (attributes_ind))
+		print("\nAttributes list (in common between the two):", attributes)
+		
 		
 		dates = self.get_delimitation_dates(startYear, endYear, timespan)
 		
