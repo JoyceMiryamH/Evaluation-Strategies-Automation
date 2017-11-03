@@ -17,10 +17,10 @@ import sys
 sys.path.extend(('C:\\Python34\\lib\\site-packages\\win32', 'C:\\Python34\\lib\\site-packages\\win32\\lib', 'C:\\Python34\\lib\\site-packages\\Pythonwin'))
 import xlwings as xw
 import datetime as dt
+import calendar
 from dateutil.relativedelta import relativedelta
 
 class INDICATORRESULTS():
-	# doit pouvoir générer une liste des couples de dates de l'année de départ à l'année de fin en fonction de la périodicité 
 	def get_delimitation_dates(self, startYear, endYear, timespan):
 		current = dt.date(startYear, 1, 1)
 		
@@ -49,41 +49,99 @@ class INDICATORRESULTS():
 		
 		return dates_array
 	
-	def main_loop(self, source, indicator, results, dates):
-		return 0
-		# boucle extérieure : par facility
-		# boucle intérieure : par période
+	def get_attributes_list(self, sourcefile, indicatorsheet):
+		attributes_src = list(sourcefile)[list(sourcefile).index('EEM Water Qual Mon Date')+1:]
+		attributes_ind = []
+		for i in indicatorsheet:
+			attributes_ind.append([i[0].value,i[0].row])
+			# tableau avec deux valeurs pour chaque entrée: le nom d'attribut et le numéro de ligne dans le fichier indicateur
+		del attributes_ind[0]
+		del attributes_ind[0]
+		# ^ permet de retirer les en-têtes de la liste
 		
+		
+		attributes = list(set(attributes_src) & set([i[0] for i in attributes_ind]))
+		for i in range(len(attributes_ind),0,-1):
+			if (attributes_ind[i-1][0] not in attributes):
+				del attributes_ind[i-1]
+		# test prints :
+		#print("Attributes list (source side):", attributes_src)
+		#print("\nAttributes list (indicator side):", [i[0] for i in attributes_ind])
+		#print("\nAttributes list (in common between the two):", attributes)
+		#print("\nAttributes list (of only the attributes that will be taken in account b/c they're in both files):", attributes_ind)
+		return attributes_ind
+	
+	def name_that_period(self, date_full, facility, timespan):
+		date = date_full.split('-')
+		if (timespan == 'year'):
+			periodname = date[0]
+		elif (timespan == 'semester'):
+			if (date[1] < 6):
+				periodname = 'S1 ' + date[0]
+			else:
+				periodname = 'S2 ' + date[0]
+		elif (timespan == 'trimester'):
+			if (date[1] < 3):
+				periodname = 'Q1 ' + date[0]
+			elif (date[1] < 6):
+				periodname = 'Q2 ' + date[0]
+			elif (date[1] < 9):
+				periodname = 'Q3 ' + date[0]
+			else:
+				periodname = 'Q4 ' + date[0]
+		elif (timespan == 'month'):
+			periodname = calendar.month_name[date[1]] + ' ' + date[0]
+		elif (timespan == 'day'):
+			periodname = date_full
+		#print(facility)
+		#print(periodname)
+		return facility + ' ' + str(periodname)
+	
+	def main_loop(self, sourcefile, facility, dates, attributes, timespan):
+		dfs_row = [self.name_that_period(dates[0], facility, timespan)]
+		for a in attributes:
+			pf1 = sourcefile.loc[(sourcefile['Facility Name']==facility) & (sourcefile['EEM Water Qual Mon Date']>=dates[0]) & (sourcefile['EEM Water Qual Mon Date']<=dates[1])]
+			pf2 = pf1[[a[0]]].dropna(axis=1, how='all')
+			if pf2.empty:
+				dfs_row.append('empty')
+			else:
+				dfs_row.append(pd.to_numeric(pf2.iloc[0]).mean())
+                
+        # décommenter la ligne ci-dessous pour voir la liste que produit main_loop 
+		#print(dfs_row)
+        
+		return dfs_row
 	
 	def main(self, source, indicator, results, startYear, endYear, timespan):
 		print('start automation\n')
-		print('reading data source\n')
 		xls_file = pd.ExcelFile(source)
 		df = xls_file.parse('Sheet1')
-		print('reading indicator template\n')
 		wb2 = load_workbook(filename = indicator)
 		ws2 = wb2.active
-
-		facility = pd.unique(df['Facility Name'])
+		print('files read without issues')
 		
-		attributes_src = list(df)[list(df).index('EEM Water Qual Mon Date')+1:]
-		attributes_ind = []
-		for i in ws2:
-			attributes_ind.append([i[0].value,i[0].coordinate,0])
-		attributes_ind.remove(['Indicators','A1', 0])
-		attributes_ind.remove(['Name','A2', 0])
-		print("Attributes list (source side):", attributes_src)
-		print("\nAttributes list (indicator side):", [i[0] for i in attributes_ind])
+		# facilities : la liste des différentes facilités comprises dans Facility Names dans le document source
+		facilities = pd.unique(df['Facility Name']).tolist()
+		del facilities[-1] 				#parce que unique donne un array, et après conversion en liste il reste l'élément NaN à la fin de la liste, donc snip, on coupe ça
 		
-		attributes = list(set(attributes_src) & set (attributes_ind))
-		print("\nAttributes list (in common between the two):", attributes)
+		# attributes : la liste des attributs DONT LE NOM EST IDENTIQUE DANS LES DEUX FICHIERS SEULEMENT, avec trois dimensions : le nom de l'attribut,
+		# 			   et sa rangée dans le fichier indicateur
+		attributes = self.get_attributes_list(df, ws2)
 		
-		
+		# dates : la liste des dates de début et de fin de chaque période comprise entre les deux années inclusivement (les dates de début et dates de fin sont les deux dimensions)
 		dates = self.get_delimitation_dates(startYear, endYear, timespan)
+		print('data obtained without issues')
 		
+		
+		# data_for_strategies : liste qui va comprendre toutes les données pour le calcul de stratégies
+		# 						chaque sous-tableau comprend le nom de la stratégie (ex.: 'MM1030 2009') et toutes les valeurs des attributs pris en compte
+		data_for_strategies = []
+		for i in facilities:
+			for j in dates:
+				data_for_strategies.append(self.main_loop(df, i, j, attributes, timespan))
 		
 		# set value for 2009
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[0][0]) & (df['EEM Water Qual Mon Date']<dates[0][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[0][0]) & (df['EEM Water Qual Mon Date']<dates[0][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal
@@ -95,7 +153,7 @@ class INDICATORRESULTS():
 		wb.close()
 
 		# set value for 2010
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[1][0]) & (df['EEM Water Qual Mon Date']<dates[1][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[1][0]) & (df['EEM Water Qual Mon Date']<dates[1][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal
@@ -107,7 +165,7 @@ class INDICATORRESULTS():
 		wb.close()
 
 		# set value for 2011
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[2][0]) & (df['EEM Water Qual Mon Date']<dates[2][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[2][0]) & (df['EEM Water Qual Mon Date']<dates[2][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal
@@ -119,7 +177,7 @@ class INDICATORRESULTS():
 		wb.close()
 
 		# set value for 2012
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[3][0]) & (df['EEM Water Qual Mon Date']<dates[3][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[3][0]) & (df['EEM Water Qual Mon Date']<dates[3][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal
@@ -131,7 +189,7 @@ class INDICATORRESULTS():
 		wb.close()
 
 		# set value for 2013
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[4][0]) & (df['EEM Water Qual Mon Date']<dates[4][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[4][0]) & (df['EEM Water Qual Mon Date']<dates[4][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal
@@ -143,7 +201,7 @@ class INDICATORRESULTS():
 		wb.close()
 
 		# set value for 2014
-		pf1 = df.loc[(df['Facility Name']==facility[0]) & (df['EEM Water Qual Mon Date']>dates[5][0]) & (df['EEM Water Qual Mon Date']<dates[5][1])]
+		pf1 = df.loc[(df['Facility Name']==facilities[0]) & (df['EEM Water Qual Mon Date']>dates[5][0]) & (df['EEM Water Qual Mon Date']<dates[5][1])]
 		pf2 = pf1[['Facility Name', 'EEM Water Qual Mon Date', 'pH']]
 		meanVal = pf2.loc[:,'pH'].mean()
 		ws2['F22'] = meanVal

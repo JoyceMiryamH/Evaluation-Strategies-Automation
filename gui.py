@@ -17,14 +17,14 @@ class Window:
 		self.choice1=Label(root, text="Source file: " ).grid(row=1, column=1, sticky = E)
 		self.bar1=Entry(master, state='disabled', disabledbackground="white", disabledforeground="black")
 		self.bar1.grid(row=1, column=2, sticky = W + E, padx = 10)
-		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(0,self.bar1))
+		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(0,self.bar1,self.filenames[0]))
 		self.bbutton.grid(row=1, column=3, sticky = E)
 		
 		# la seconde ligne, pour le fichier indicateur
 		self.choice2=Label(root, text="Indicator file: " ).grid(row=2, column=1, sticky = E)
 		self.bar2=Entry(master, state='disabled', disabledbackground="white", disabledforeground="black")
 		self.bar2.grid(row=2, column=2, sticky = W + E, padx = 10)
-		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(1,self.bar2))
+		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(1,self.bar2,self.filenames[1]))
 		self.bbutton.grid(row=2, column=3, sticky = E)
 		
 		# la troisième ligne, pour la sélection des périodes
@@ -55,12 +55,12 @@ class Window:
 		
 
 	# fonction lancée quand on clique sur Browse
-	def browsexlsx(self, filename_id, bar):
+	def browsexlsx(self, filename_id, bar, original_filename):
 		Tk().withdraw()
 		bar.config(state='normal')
 		self.filenames[filename_id] = askopenfilename()
 		if (self.filenames[filename_id] == ""):
-			self.filenames[filename_id] = bar.get()
+			self.filenames[filename_id] = original_filename
 		else:
 			bar.delete(0, END)
 			bar.insert(10, self.extract_filename(self.filenames[filename_id]))
