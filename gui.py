@@ -6,6 +6,7 @@
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from tkinter import *
+from preliminaryCheck import PreliminaryCheck as pc
 from indicatorResults import INDICATORRESULTS as ir
 
 class Window:
@@ -64,6 +65,8 @@ class Window:
 		else:
 			bar.delete(0, END)
 			bar.insert(10, self.extract_filename(self.filenames[filename_id]))
+		#if (filename_id == 0):
+		#	self.status.config(text=pc().check_data_source(self.filenames[filename_id]))
 		bar.config(state='disabled')
 
 	# fonction pour afficher proprement le résultat du Browse, mise à part à cause de possibles problèmes de portabilité
