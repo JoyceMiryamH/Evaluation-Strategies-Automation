@@ -6,10 +6,13 @@
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from tkinter import *
+from tkinter import scrolledtext as tkst
 from preliminaryCheck import PreliminaryCheck as pc
 from indicatorResults import INDICATORRESULTS as ir
 
 class Window:
+	status = 0
+	
 	# crée la structure et les objets de l'UI
 	def __init__(self, master):
 		self.filenames = ["",""]
@@ -38,23 +41,77 @@ class Window:
 		self.bar4.grid(row=4, column=2, sticky = W + E, padx = 10, columnspan = 2)
 		
 		# l'antépénultième ligne, pour displayer le message d'erreur
-		self.status=Label(root, text="", fg = "red")
-		self.status.grid(row=9, column=1, columnspan=3)
+		# self.status=Label(root, text="", bg = "white", relief="ridge", width=40, height=10, anchor=NW, justify=LEFT, wraplength=285)
+		self.status=tkst.ScrolledText(root, bg = "white", relief="groove", width=30, height=10, wrap=WORD, state=DISABLED)
+		self.status.grid(row=8, column=1, columnspan=3, sticky=W+E)
 		
 		# LE BOUTON FINAL WOOHOO (soyons enthousiastes, à ce point là la fenêtre est finie, cool non ?)  
-		self.cbutton= Button(root, text="OK", command=self.process_strategies)
+		self.cbutton= Button(root, text="Check", command= lambda: self.preliminaryCheck("normal"))
 		self.cbutton.grid(row=10, column=3, sticky = W + E)
 		
 		# de l'espace
 		root.grid_columnconfigure(0, minsize=10)
 		root.grid_columnconfigure(4, minsize=10)
 		root.grid_rowconfigure(0, minsize=10)
+		root.grid_rowconfigure(7, minsize=10)
+		root.grid_rowconfigure(8, minsize=50)
+		root.grid_rowconfigure(9, minsize=10)
 		root.grid_rowconfigure(11, minsize=10)
 		
 		#et enfin une petite touche d'interactivité pour nos amis les gens qui en ont marre de leur trackpad
-		root.bind('<Return>', lambda e: self.process_strategies())
+		root.bind('<Return>', lambda e: self.preliminaryCheck("normal"))
 		
-
+	# parce que le module texte scrollable a ses propres emmerdes, on a besoin d'une méthode pour éditer ça pro-pre-ment
+	def newText(self, text, color):
+		self.status.config(state=NORMAL, fg=color)
+		self.status.delete(1.0, END)
+		self.status.insert(END, text)
+		self.status.config(state=DISABLED)
+	
+	
+	# fonction pour remplir la fenêtre avec les informations nécessaires, permet aussi de valider les fichiers
+	# l'argument mode peut être "silent" si on ne veut rien mettre dans la fenêtre (sauf en cas d'erreur) 
+	def preliminaryCheck(self, mode):
+		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""):
+			self.newText("ERROR: Please fill in required fields (i.e, all of them).", "red")
+			status = 0
+		elif (self.filenames[0] == self.filenames[1]):
+			self.newText("ERROR: The source and indicator files must not be the same file.", "red")
+			status = 0
+		elif (self.filenames[0].split('.')[-1] != "xlsx" or self.filenames[1].split('.')[-1] != "xlsx"):
+			self.newText("ERROR: The source and indicator files must have the XLSX extension.", "red")
+			status = 0
+		else:
+			try:
+				source_state = pc().check_data_source(self.filenames[0])
+				if source_state == "Valid file.":
+					try:
+						indicator_state = pc().check_indicator(self.filenames[1])
+						if indicator_state == "Valid file.":
+							if mode != "silent":
+								self.newText(pc().get_indicators(self.filenames[0], self.filenames[1]), "black")
+							status = 1
+						else:
+							self.newText(indicator_state, "red")
+							status = 0
+					except Exception:
+						self.newText("ERROR: Indicator file is not an Excel file.", "red")
+						status = 0
+				else:
+					self.newText(source_state, "red")
+					status = 0
+			except Exception:
+				self.newText("ERROR: Source file is not an Excel file.", "red")
+				status = 0
+		
+		if status:
+			self.cbutton.configure(text="OK", command=self.process_strategies)
+			root.bind('<Return>', lambda e: self.process_strategies())
+		else:
+			self.cbutton.configure(text="Check", command= lambda: self.preliminaryCheck("normal"))
+			root.bind('<Return>', lambda e: self.preliminaryCheck("normal"))
+		return status
+			
 	# fonction lancée quand on clique sur Browse
 	def browsexlsx(self, filename_id, bar, original_filename):
 		Tk().withdraw()
@@ -77,19 +134,7 @@ class Window:
 		
 	# fonction lancée quand on clique sur OK (c'est là qu'on veut mettre notre code mais on peut aussi juste appeler ton code à partir de là)
 	def process_strategies(self):
-		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""):
-			self.status.config(text="Please fill in required fields (i.e, all of them).")
-			print()
-		elif (self.filenames[0] == self.filenames[1]):
-			self.status.config(text="The source and indicator files may not be the same file.")
-			print()
-		elif (self.filenames[0].split('.')[-1] != "xlsx" or self.filenames[1].split('.')[-1] != "xlsx"):
-			self.status.config(text="The source and indicator files must have the XLSX extension.")
-			print()
-		else:
-			print("Data source file path: ",self.filenames[0])
-			print("Indicator file path: ",self.filenames[1])
-			
+		if self.preliminaryCheck("silent"):
 			newfilename = self.bar4.get()
 			if (self.bar4.get().split('.')[-1] != "csv" or len(self.bar4.get().split('.')) == 1):
 				newfilename = newfilename + ".csv"
