@@ -20,38 +20,49 @@ class Window:
 		# la première ligne, pour le fichier source
 		self.choice1=Label(root, text="Source file: " ).grid(row=1, column=1, sticky = E)
 		self.bar1=Entry(master, state='disabled', disabledbackground="white", disabledforeground="black")
-		self.bar1.grid(row=1, column=2, sticky = W + E, padx = 10)
+		self.bar1.grid(row=1, column=2, sticky = W + E, padx = 10, columnspan = 2)
 		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(0,self.bar1,self.filenames[0]))
-		self.bbutton.grid(row=1, column=3, sticky = E)
+		self.bbutton.grid(row=1, column=4, sticky = E)
 		
 		# la seconde ligne, pour le fichier indicateur
 		self.choice2=Label(root, text="Indicator file: " ).grid(row=2, column=1, sticky = E)
 		self.bar2=Entry(master, state='disabled', disabledbackground="white", disabledforeground="black")
-		self.bar2.grid(row=2, column=2, sticky = W + E, padx = 10)
+		self.bar2.grid(row=2, column=2, sticky = W + E, padx = 10, columnspan = 2)
 		self.bbutton= Button(root, text="Browse", command= lambda: self.browsexlsx(1,self.bar2,self.filenames[1]))
-		self.bbutton.grid(row=2, column=3, sticky = E)
+		self.bbutton.grid(row=2, column=4, sticky = E)
 		
 		# la troisième ligne, pour la sélection des périodes
 		self.choice3=Label(root, text="Time span: " ).grid(row=3, column=1, sticky = E)
-		self.bar3=Label(root, text="Yearly (more options to come)", fg = "grey" ).grid(row=3, column=2, columnspan=2)
+		self.value = StringVar(root)
+		self.value.set('year')
+		self.bar3=OptionMenu(root, self.value, 'day', 'month', 'trimester', 'semester', 'year')
+		self.bar3.grid(row=3, column=2, columnspan=2, padx = 10, sticky = W+E)
 		
-		# la quatrième ligne, pour le choix du nom du fichier résultat
-		self.choice4=Label(root, text="Strategies \n file name: ").grid(row=4, column=1, sticky = E)
+		# la cinquième ligne qui est affichée en 4e, pour le choix des années concernées
+		self.choice5=Label(root, text="From / to: ").grid(row=4, column=1, sticky = E)
+		self.bar5dot1=Entry(master)
+		self.bar5dot2=Entry(master)
+		self.bar5dot1.grid(row=4, column=2, sticky = W + E, padx = 10)
+		self.bar5dot2.grid(row=4, column=3, sticky = W + E, padx = 10)
+		self.choice5=Label(root, text="(years)", fg="grey").grid(row=4, column=4, sticky = W)
+		
+		# la quatrième ligne qui est affichée en 5e, pour le choix du nom du fichier résultat
+		self.choice4=Label(root, text="Strategies \n file name: ").grid(row=5, column=1, sticky = E)
 		self.bar4=Entry(master)
-		self.bar4.grid(row=4, column=2, sticky = W + E, padx = 10, columnspan = 2)
+		self.bar4.grid(row=5, column=2, sticky = W + E, padx = 10, columnspan = 3)
 		
 		# l'antépénultième ligne, pour displayer le message d'erreur
 		# self.status=Label(root, text="", bg = "white", relief="ridge", width=40, height=10, anchor=NW, justify=LEFT, wraplength=285)
 		self.status=tkst.ScrolledText(root, bg = "white", relief="groove", width=30, height=10, wrap=WORD, state=DISABLED)
-		self.status.grid(row=8, column=1, columnspan=3, sticky=W+E)
+		self.status.grid(row=8, column=1, columnspan=4, sticky=W+E)
 		
 		# LE BOUTON FINAL WOOHOO (soyons enthousiastes, à ce point là la fenêtre est finie, cool non ?)  
 		self.cbutton= Button(root, text="Check", command= lambda: self.preliminaryCheck("normal"))
-		self.cbutton.grid(row=10, column=3, sticky = W + E)
+		self.cbutton.grid(row=10, column=4, sticky = W + E)
 		
 		# de l'espace
 		root.grid_columnconfigure(0, minsize=10)
-		root.grid_columnconfigure(4, minsize=10)
+		root.grid_columnconfigure(5, minsize=10)
 		root.grid_rowconfigure(0, minsize=10)
 		root.grid_rowconfigure(7, minsize=10)
 		root.grid_rowconfigure(8, minsize=50)
@@ -68,11 +79,19 @@ class Window:
 		self.status.insert(END, text)
 		self.status.config(state=DISABLED)
 	
+	# on veut vérifier que les années données sont bien des années
+	def isInt(self, s):
+		try:
+			int(s)
+			return True
+		except ValueError:
+			return False
+	
 	
 	# fonction pour remplir la fenêtre avec les informations nécessaires, permet aussi de valider les fichiers
 	# l'argument mode peut être "silent" si on ne veut rien mettre dans la fenêtre (sauf en cas d'erreur) 
 	def preliminaryCheck(self, mode):
-		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""):
+		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""or self.bar5dot1.get() == ""or self.bar5dot2.get() == ""):
 			self.newText("ERROR: Please fill in required fields (i.e, all of them).", "red")
 			status = 0
 		elif (self.filenames[0] == self.filenames[1]):
@@ -80,6 +99,12 @@ class Window:
 			status = 0
 		elif (self.filenames[0].split('.')[-1] != "xlsx" or self.filenames[1].split('.')[-1] != "xlsx"):
 			self.newText("ERROR: The source and indicator files must have the XLSX extension.", "red")
+			status = 0
+		elif not (self.isInt(self.bar5dot1.get()) and self.isInt(self.bar5dot2.get())):
+			self.newText("ERROR: The \"From / to:\" fields must both represent years, written as integers (no decimal value, no characters other than numbers).", "red")
+			status = 0
+		elif (self.bar5dot1.get() > self.bar5dot2.get()):
+			self.newText("ERROR: The second \"From / to:\" field must represent the last year of your time span, while the first field represents the first year. The last year cannot be set before the first year.", "red")
 			status = 0
 		else:
 			try:
@@ -139,7 +164,7 @@ class Window:
 			if (self.bar4.get().split('.')[-1] != "csv" or len(self.bar4.get().split('.')) == 1):
 				newfilename = newfilename + ".csv"
 			
-			return ir().main(self.filenames[0], self.filenames[1], newfilename, 2009, 2014, 'year')
+			return ir().main(self.filenames[0], self.filenames[1], newfilename, int(self.bar5dot1.get()), int(self.bar5dot2.get()), self.value.get())
 
 root = Tk()
 root.title("Evalution Strategies Processor")

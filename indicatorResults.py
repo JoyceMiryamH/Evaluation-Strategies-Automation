@@ -115,7 +115,7 @@ class INDICATORRESULTS():
 	def main(self, source, indicator, results, startYear, endYear, timespan):
 		print('start automation\n')
 		xls_file = pd.ExcelFile(source)
-		df = xls_file.parse('Sheet1')
+		df = xls_file.parse()
 		wb2 = load_workbook(filename = indicator)
 		ws2 = wb2.active
 		print('files read without issues')
