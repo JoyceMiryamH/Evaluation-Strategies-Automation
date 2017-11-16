@@ -44,7 +44,7 @@ class PreliminaryCheck():
 		ws2 = wb2.active
 		indicators = ir().get_attributes_list(df, ws2)
 		
-		return "The indicators we found were: " + ", ".join([i[0] for i in indicators]) + ".\n\nIf you expected other indicators to be found, please make sure they have the same name in both files."
+		return "The indicators we found were: " + ", ".join([i[0] for i in indicators]) + ".\n\nIf you expected other indicators to be found, please make sure they have the exact same name in both files.\n\nIf not, please click OK."
 		
 		
 	
