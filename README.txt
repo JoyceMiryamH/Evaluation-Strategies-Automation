@@ -5,6 +5,6 @@ This program uses two files to output a strategies file. Those two files must co
 * The data source file must have a EEM Water Qual Mon Date column, with the date of each sample written in text following this format: YYYY-MM-DD
 * All the indicators must be on the right of the EEM Water Qual Mon Date column.
 
-* The indicator file's column names must be on the second row of the sheet.
-* The indicator file must have Name, Target, Threshold and Worst columns.
+* The indicator file must have Name, Target, Threshold and Worst columns, with these column names being written in the second row.
+* The indicator file must have "Indicators" (without quotes) written in the cell above the Name column, in the first row.
 * The indicators' names in the indicator file must be consistent with the indicators' names in the source file.

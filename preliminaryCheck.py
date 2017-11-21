@@ -42,9 +42,22 @@ class PreliminaryCheck():
 		df = xls_file.parse()
 		wb2 = load_workbook(filename = indicator)
 		ws2 = wb2.active
-		indicators = ir().get_attributes_list(df, ws2)
+		indicators = [i[0] for i in ir().get_attributes_list(df, ws2)]
 		
-		return "The indicators we found were: " + ", ".join([i[0] for i in indicators]) + ".\n\nIf you expected other indicators to be found, please make sure they have the exact same name in both files.\n\nIf not, please click OK."
+		attributes_ind = []
+		for i in ws2:
+			attributes_ind.append(i[0].value)
+		
+		# on enlever à la main les en-têtes du fichier indicateur, vu qu'openpyxl permet pas de faire ça proprement
+		attributes_ind.remove("Indicators")
+		attributes_ind.remove("Name")
+		
+		attributes_ind = list(set(attributes_ind) - set(indicators))
+		
+		if len(attributes_ind) == 0:
+			return "The indicators we found were: " + ", ".join(indicators) + ".\n\nNo other indicators were found in the indicator file.\n\nPlease click OK to proceed."
+		else:
+			return "The indicators we found were: " + ", ".join(indicators) + ".\n\nThe following indicators were found in the indicator file but not the source file: " + ", ".join(attributes_ind) + ".\n\nIf you want some of these indicators to be used, please make sure they have the same name in both files before trying again. When you're done, please click OK. "
 		
 		
 	

@@ -56,9 +56,11 @@ class Window:
 		self.status=tkst.ScrolledText(root, bg = "white", relief="groove", width=30, height=10, wrap=WORD, state=DISABLED)
 		self.status.grid(row=8, column=1, columnspan=4, sticky=W+E)
 		
-		# LE BOUTON FINAL WOOHOO (soyons enthousiastes, à ce point là la fenêtre est finie, cool non ?)  
+		# les boutons finaux
 		self.cbutton= Button(root, text="Check", command= lambda: self.preliminaryCheck("normal"))
-		self.cbutton.grid(row=10, column=4, sticky = W + E)
+		self.cbutton.grid(row=10, column=3, sticky = E)
+		self.obutton= Button(root, text="OK", command=self.process_strategies, state=DISABLED)
+		self.obutton.grid(row=10, column=4, sticky = W + E)
 		
 		# de l'espace
 		root.grid_columnconfigure(0, minsize=10)
@@ -130,10 +132,10 @@ class Window:
 				status = 0
 		
 		if status:
-			self.cbutton.configure(text="OK", command=self.process_strategies)
+			self.obutton.config(state="normal")
 			root.bind('<Return>', lambda e: self.process_strategies())
 		else:
-			self.cbutton.configure(text="Check", command= lambda: self.preliminaryCheck("normal"))
+			self.obutton.config(state=DISABLED)
 			root.bind('<Return>', lambda e: self.preliminaryCheck("normal"))
 		return status
 			
