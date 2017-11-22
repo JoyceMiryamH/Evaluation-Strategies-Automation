@@ -9,6 +9,7 @@ from tkinter import *
 from tkinter import scrolledtext as tkst
 from preliminaryCheck import PreliminaryCheck as pc
 from indicatorResults import INDICATORRESULTS as ir
+import re
 
 class Window:
 	status = 0
@@ -100,13 +101,16 @@ class Window:
 			self.newText("ERROR: The source and indicator files must not be the same file.", "red")
 			status = 0
 		elif (self.filenames[0].split('.')[-1] != "xlsx" or self.filenames[1].split('.')[-1] != "xlsx"):
-			self.newText("ERROR: The source and indicator files must have the XLSX extension.", "red")
+			self.newText("ERROR: The source and indicator files must have the \".xlsx\" extension. (must be in lowercase)", "red")
 			status = 0
 		elif not (self.isInt(self.bar5dot1.get()) and self.isInt(self.bar5dot2.get())):
 			self.newText("ERROR: The \"From / to:\" fields must both represent years, written as integers (no decimal value, no characters other than numbers).", "red")
 			status = 0
 		elif (self.bar5dot1.get() > self.bar5dot2.get()):
 			self.newText("ERROR: The second \"From / to:\" field must represent the last year of your time span, while the first field represents the first year. The last year cannot be set before the first year.", "red")
+			status = 0
+		elif not (re.match("^[A-Za-z0-9\_\-\.]+$", self.bar4.get())) or self.bar4.get() == ".":
+			self.newText("ERROR: The strategies file name cannot contain any characters beside letters, numbers, underscores, dashes and points.", "red")
 			status = 0
 		else:
 			try:
@@ -116,7 +120,7 @@ class Window:
 						indicator_state = pc().check_indicator(self.filenames[1])
 						if indicator_state == "Valid file.":
 							if mode != "silent":
-								self.newText(pc().get_indicators(self.filenames[0], self.filenames[1]), "black")
+								self.newText(pc().get_indicators(self.filenames[0], self.filenames[1]) + "\n\nIf you are fine with the currently selected indicators, please click OK. Else, please do the appropriate modifications and click Check.", "black")
 							status = 1
 						else:
 							self.newText(indicator_state, "red")

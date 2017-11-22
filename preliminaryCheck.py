@@ -57,7 +57,7 @@ class PreliminaryCheck():
 		if len(attributes_ind) == 0:
 			return "The indicators we found were: " + ", ".join(indicators) + ".\n\nNo other indicators were found in the indicator file.\n\nPlease click OK to proceed."
 		else:
-			return "The indicators we found were: " + ", ".join(indicators) + ".\n\nThe following indicators were found in the indicator file but not the source file: " + ", ".join(attributes_ind) + ".\n\nIf you want some of these indicators to be used, please make sure they have the same name in both files before trying again. When you're done, please click OK. "
+			return "The indicators we found were: " + ", ".join(indicators) + ".\n\nThe following indicators were found in the indicator file but not the source file: " + ", ".join(attributes_ind) + ".\n\nIf you want some of these indicators to be used, please make sure they have the same name in both files before trying again."
 		
 		
 	
