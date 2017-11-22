@@ -17,7 +17,7 @@ def process(src, ind, tsp, syr, eyr, dst):
 	if check(src, ind, tsp, syr, eyr, dst, "silent"):
 		if (dst.split('.')[-1] != "csv" or len(dst.split('.')) == 1):
 			dst = dst + ".csv"
-		return ir().main(src, ind, tsp, syr, eyr, dst)
+		return ir().main(src, ind, dst, syr, eyr, tsp)
 	else:
 		print("Note: please don't manipulate the source and indicator files while running")
 		print("          this program.")
@@ -103,4 +103,4 @@ else:
 	eyr = sys.argv[5]
 	dst = sys.argv[6]
 	if check(src, ind, tsp, syr, eyr, dst, "normal"):
-		process(src, ind, tsp, syr, eyr, dst)
+		process(src, ind, tsp, int(syr), int(eyr), dst)
