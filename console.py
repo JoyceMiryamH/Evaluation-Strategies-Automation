@@ -57,12 +57,13 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 					if indicator_state == "Valid file.":
 						if mode != "silent":
 							print(pc().get_indicators(src, ind))
-							if input("\nProceed? [Y/N] ") in ["y", "Y", "Yes", "YES", "yes"]:
-								return 1
-							else:
-								print("Process aborted. Please do the appropriate modifications BEFORE calling this")
-								print("          program again.")
-								return 0
+							if mode == "manual":
+								if input("\nProceed? [Y/N] ") in ["y", "Y", "Yes", "YES", "yes"]:
+									return 1
+								else:
+									print("Process aborted. Please do the appropriate modifications BEFORE calling this")
+									print("          program again.")
+									return 0
 						return 1
 					else:
 						print(indicator_state)
@@ -74,16 +75,19 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 			print("ERROR: Source file is not an Excel file.")
 			
 	return 0
-	
 
-if (len(sys.argv) != 7) or (sys.argv[1] == 'help'):
 
-	print(sys.argv)
-	
+manual = 0
+if (len(sys.argv) == 8):
+	if sys.argv[7] == '--m':
+		manual = 1	
+
+if (len(sys.argv) != 7 and not manual) or (sys.argv[1] == 'help'):
+
 	print("\nERROR: Wrong use of the command line arguments. Please make sure you write")
 	print("          your command the following way, with all the following arguments.")
 	print("   console.py <sourcepath> <indicatorpath> <timespan> <startyear> <endyear>")
-	print("                 <destination>\n")
+	print("                 <destination> [--m]\n")
 	
 	print("Here are the arguments you have to use:")
 	print("   sourcepath      The path to your data source file (e.g.: \"C:\\src.xlsx\" ).")
@@ -94,7 +98,10 @@ if (len(sys.argv) != 7) or (sys.argv[1] == 'help'):
 	print("   startyear       The first year for which you want to calculate strategies.")
 	print("   endyear         The last year for which you want to calculate strategies")
 	print("                      (inclusively).")
-	print("   destination     The name you want to use for the resulting strategies file.")
+	print("   destination     The name you want to use for the resulting strategies file.\n")
+	
+	print("Here is an optional argument that you may add after the mandatory ones:")
+	print("   --m             To enable manual validation of found indicators.")
 else:
 	src = sys.argv[1]
 	ind = sys.argv[2]
@@ -102,5 +109,9 @@ else:
 	syr = sys.argv[4]
 	eyr = sys.argv[5]
 	dst = sys.argv[6]
-	if check(src, ind, tsp, syr, eyr, dst, "normal"):
-		process(src, ind, tsp, int(syr), int(eyr), dst)
+	if manual:
+		if check(src, ind, tsp, syr, eyr, dst, "manual"):
+			process(src, ind, tsp, int(syr), int(eyr), dst)
+	else:
+		if check(src, ind, tsp, syr, eyr, dst, "normal"):
+				process(src, ind, tsp, int(syr), int(eyr), dst)

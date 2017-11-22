@@ -19,6 +19,7 @@ import datetime as dt
 import calendar
 from dateutil.relativedelta import relativedelta
 import numpy as np
+import math
 
 class INDICATORRESULTS():
 	def get_delimitation_dates(self, startYear, endYear, timespan):
@@ -84,8 +85,7 @@ class INDICATORRESULTS():
 			if not found:
 				newattributes.append([a, 'no'])
 		return newattributes
-			
-	
+
 	def name_that_period(self, date_full, facility, timespan):
 		date = date_full.split('-')
 		if (timespan == 'year'):
@@ -112,15 +112,33 @@ class INDICATORRESULTS():
 		#print(periodname)
 		return facility + ' ' + str(periodname)
 
+	def correct_dates(self, date):
+		if len(str(date)) == 4:
+			return str(date) + "-01-01"
+		else:
+			return str(date)
+	
+	def make_it_float(self, x):
+		#print("Now is ", x,",", type(x))
+		if not (x is None):
+			try:
+				return float(x)
+			except ValueError:
+				return np.nan
+				
+	
 	def main_loop(self, sourcefile, facility, dates, attributes, timespan):
 		dfs_row = [self.name_that_period(dates[0], facility, timespan)]
-		for a in attributes:
-			pf1 = sourcefile.loc[(sourcefile['Name']==facility) & (sourcefile['Date']>=dates[0]) & (sourcefile['Date']<=dates[1])]
-			pf2 = pf1[[a[0]]].dropna(axis=0, how='all')
-			if pf2.empty:
-				dfs_row.append('empty')
+		for a in attributes[1:]:
+			if a[1] != 'no':
+				pf1 = sourcefile.loc[(sourcefile['Name']==facility) & (sourcefile['Date']>=dates[0]) & (sourcefile['Date']<=dates[1])]
+				pf2 = pf1[[a[0]]].dropna(axis=0, how='all')
+				if pf2.empty:
+					dfs_row.append('empty')
+				else:
+					dfs_row.append(pf2.iloc[:,0].mean())
 			else:
-				dfs_row.append(pd.to_numeric(pf2.iloc[0]).mean())
+				dfs_row.append('empty')
 
         # décommenter la ligne ci-dessous pour voir la liste que produit main_loop
 		#print(dfs_row)
@@ -160,20 +178,26 @@ class INDICATORRESULTS():
 	def main(self, source, indicator, results, startYear, endYear, timespan):
 		print('starting automation\n')
 		xls_file = pd.ExcelFile(source)
-		df = xls_file.parse('Sheet1')
+		df = xls_file.parse()
 		wb2 = load_workbook(filename = indicator)
 		ws2 = wb2.active
 		print('files read without issues')
+		
+		df['Date'] = df['Date'].apply(self.correct_dates)
 
 		# facilities : la liste des différentes facilités comprises dans Names dans le document source
 		facilities = pd.unique(df['Name']).tolist()
-		del facilities[-1] 				#parce que unique donne un array, et après conversion en liste il reste l'élément NaN à la fin de la liste, donc snip, on coupe ça
-
+		
+		#print([f for f in facilities if not math.isnan(f)])
+		facilities = [x for x in facilities if str(x) != 'nan']
+		
 		# attributes : la liste des attributs DONT LE NOM EST IDENTIQUE DANS LES DEUX FICHIERS SEULEMENT, avec trois dimensions : le nom de l'attribut,
 		# 			   et sa rangée dans le fichier indicateur
 		attributes = self.get_attributes_list(df, ws2)
 		attributes_ordered = self.get_best_list(df, attributes)
-		#print([i[0] for i in attributes_ordered])
+		
+		for a in attributes_ordered[1:]:
+			df[a[0]] = df[a[0]].apply(self.make_it_float)
 
 		# dates : la liste des dates de début et de fin de chaque période comprise entre les deux années inclusivement (les dates de début et dates de fin sont les deux dimensions)
 		dates = self.get_delimitation_dates(startYear, endYear, timespan)
@@ -185,7 +209,7 @@ class INDICATORRESULTS():
 		data_for_strategies = []
 		for i in facilities:
 			for j in dates:
-				row = self.main_loop(df, i, j, attributes, timespan)
+				row = self.main_loop(df, i, j, attributes_ordered, timespan)
 				if not all(r == 'empty' for r in row[1:]):
 					data_for_strategies.append(row)
 		
@@ -202,33 +226,39 @@ class INDICATORRESULTS():
 						target = ws2['B'+str(attributes_ordered[d][1])].value
 						threshold = ws2['C'+str(attributes_ordered[d][1])].value
 						worst = ws2['D'+str(attributes_ordered[d][1])].value
-						values.append(self.quantitative(target, threshold, worst, data[d]))
+						values.append(int(self.quantitative(target, threshold, worst, data[d])))
+						#print(attributes_ordered[d][0], ":", data[d], "@ column:", attributes_ordered[d][1], ", result = ", values[-1]) 
 			
-			strategies_desc.append([data[0], "esp", "No description"])
+			strategies_desc.append([data[0], '"esp"', '"No description"', '""'])
 			strategies_data.append(values)
 
 		with open(results, 'w', newline='') as csvfile:
 			filewriter = csv.writer(csvfile, delimiter=',',
 									quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
 			
-			filewriter.writerow(['GRL Strategies for', results[:-4]])
+			stratfilename = '"' + results[:-4] + '"'
+			filewriter.writerow(['GRL Strategies for', stratfilename])
 			filewriter.writerow([''])
 			filewriter.writerow([''])
 			
 			filewriter.writerow(['Strategy Name', ' Author', ' Description', ' "Included Strategies"'])
 			for i in strategies_desc:
 				filewriter.writerow(i)
+			
 			filewriter.writerow([''])
 			filewriter.writerow([''])
 			
 			colNames = ['Strategy Name']
-			colNames.extend([i[0] for i in attributes])
+			#colNames.extend([i[0] for i in attributes])
+			for d in range(1, len(attributes_ordered)):
+				if (attributes_ordered[d][1] != 'no'):
+					colNames.append(attributes_ordered[d][0])
 			filewriter.writerow(colNames)
+			
 			for i in strategies_data:
 				filewriter.writerow(i)
 
 		print('\nresult file created\n')
 		sys.exit()
-
 
 	if __name__ == "__main__": main()
