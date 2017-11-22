@@ -16,8 +16,8 @@ class PreliminaryCheck():
 		
 		if 'Facility Name' not in df.columns:
 			return("ERROR: No Facility Name column found in Source file.\n\nPlease check the documentation to know how your file ought to be formatted.")
-		elif 'EEM Water Qual Mon Date' not in df.columns:
-			return("ERROR: No EEM Water Qual Mon Date column found in Source file.\n\nPlease check the documentation to know how your file ought to be formatted.")
+		elif 'Date' not in df.columns:
+			return("ERROR: No Date column found in Source file.\n\nPlease check the documentation to know how your file ought to be formatted.")
 		else:
 			return("Valid file.")
 		

@@ -6,7 +6,7 @@
 	# about the DATA SOURCE
 		# the headers must be in the first row
 		# all attributes must be in columns AFTER the date column, all other data BEFORE the date column
-		# the name of the date column MUST be 'EEM Water Qual Mon Date'
+		# the name of the date column MUST be 'Date'
 	# about the INDICATOR TEMPLATE
 		# the names of the attributes in this list must match the names of the attributes in the source file
 
@@ -50,7 +50,7 @@ class INDICATORRESULTS():
 		return dates_array
 
 	def get_attributes_list(self, sourcefile, indicatorsheet):
-		attributes_src = list(sourcefile)[list(sourcefile).index('EEM Water Qual Mon Date')+1:]
+		attributes_src = list(sourcefile)[list(sourcefile).index('Date')+1:]
 		attributes_ind = []
 		for i in indicatorsheet:
 			attributes_ind.append([i[0].value,i[0].row])
@@ -72,7 +72,7 @@ class INDICATORRESULTS():
 		return attributes_ind
 		
 	def get_best_list(self, sourcefile, attributesMatchedList):
-		attributes_src = list(sourcefile)[list(sourcefile).index('EEM Water Qual Mon Date')+1:]
+		attributes_src = list(sourcefile)[list(sourcefile).index('Date')+1:]
 		newattributes = [['Name', 'no']]
 		for a in attributes_src:
 			found = 0
@@ -115,7 +115,7 @@ class INDICATORRESULTS():
 	def main_loop(self, sourcefile, facility, dates, attributes, timespan):
 		dfs_row = [self.name_that_period(dates[0], facility, timespan)]
 		for a in attributes:
-			pf1 = sourcefile.loc[(sourcefile['Facility Name']==facility) & (sourcefile['EEM Water Qual Mon Date']>=dates[0]) & (sourcefile['EEM Water Qual Mon Date']<=dates[1])]
+			pf1 = sourcefile.loc[(sourcefile['Facility Name']==facility) & (sourcefile['Date']>=dates[0]) & (sourcefile['Date']<=dates[1])]
 			pf2 = pf1[[a[0]]].dropna(axis=0, how='all')
 			if pf2.empty:
 				dfs_row.append('empty')
