@@ -115,7 +115,7 @@ class INDICATORRESULTS():
 	def main_loop(self, sourcefile, facility, dates, attributes, timespan):
 		dfs_row = [self.name_that_period(dates[0], facility, timespan)]
 		for a in attributes:
-			pf1 = sourcefile.loc[(sourcefile['Facility Name']==facility) & (sourcefile['Date']>=dates[0]) & (sourcefile['Date']<=dates[1])]
+			pf1 = sourcefile.loc[(sourcefile['Name']==facility) & (sourcefile['Date']>=dates[0]) & (sourcefile['Date']<=dates[1])]
 			pf2 = pf1[[a[0]]].dropna(axis=0, how='all')
 			if pf2.empty:
 				dfs_row.append('empty')
@@ -165,8 +165,8 @@ class INDICATORRESULTS():
 		ws2 = wb2.active
 		print('files read without issues')
 
-		# facilities : la liste des différentes facilités comprises dans Facility Names dans le document source
-		facilities = pd.unique(df['Facility Name']).tolist()
+		# facilities : la liste des différentes facilités comprises dans Names dans le document source
+		facilities = pd.unique(df['Name']).tolist()
 		del facilities[-1] 				#parce que unique donne un array, et après conversion en liste il reste l'élément NaN à la fin de la liste, donc snip, on coupe ça
 
 		# attributes : la liste des attributs DONT LE NOM EST IDENTIQUE DANS LES DEUX FICHIERS SEULEMENT, avec trois dimensions : le nom de l'attribut,
