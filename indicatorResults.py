@@ -1,14 +1,4 @@
-# TO BE IMPLEMENTED
-	# boucle principale
-	# indépendance des variances de fichiers source / indicateur (noms de fichiers, nom de colonnes)
-
-# PREREQUISITES (à noter quelque part / intégrer dans l'user interface / etc. ou demander confirmation)
-	# about the DATA SOURCE
-		# the headers must be in the first row
-		# all attributes must be in columns AFTER the date column, all other data BEFORE the date column
-		# the name of the date column MUST be 'Date'
-	# about the INDICATOR TEMPLATE
-		# the names of the attributes in this list must match the names of the attributes in the source file
+# PREREQUISITES in the README.txt document
 
 import csv
 from openpyxl import load_workbook
@@ -27,9 +17,9 @@ class INDICATORRESULTS():
 
 		if (timespan == 'year'):
 			date_increment = relativedelta(years=1)
-		elif (timespan == 'semester'):
+		elif (timespan == 'bi-annual'):
 			date_increment = relativedelta(months=6)
-		elif (timespan == 'trimester'):
+		elif (timespan == 'quarter'):
 			date_increment = relativedelta(months=3)
 		elif (timespan == 'month'):
 			date_increment = relativedelta(months=1)
@@ -90,12 +80,12 @@ class INDICATORRESULTS():
 		date = date_full.split('-')
 		if (timespan == 'year'):
 			periodname = date[0]
-		elif (timespan == 'semester'):
+		elif (timespan == 'bi-annual'):
 			if (int(date[1]) < 6):
 				periodname = 'S1 ' + date[0]
 			else:
 				periodname = 'S2 ' + date[0]
-		elif (timespan == 'trimester'):
+		elif (timespan == 'quarter'):
 			if (int(date[1]) < 3):
 				periodname = 'Q1 ' + date[0]
 			elif (int(date[1]) < 6):
@@ -236,17 +226,17 @@ class INDICATORRESULTS():
 			filewriter = csv.writer(csvfile, delimiter=',',
 									quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
 			
-			stratfilename = '"' + results[:-4] + '"'
-			filewriter.writerow(['GRL Strategies for', stratfilename])
-			filewriter.writerow([''])
-			filewriter.writerow([''])
+			#stratfilename = '"' + results[:-4] + '"'
+			#filewriter.writerow(['GRL Strategies for', stratfilename])
+			#filewriter.writerow([''])
+			#filewriter.writerow([''])
 			
-			filewriter.writerow(['Strategy Name', ' Author', ' Description', ' "Included Strategies"'])
-			for i in strategies_desc:
-				filewriter.writerow(i)
+			#filewriter.writerow(['Strategy Name', ' Author', ' Description', ' "Included Strategies"'])
+			#for i in strategies_desc:
+			#	filewriter.writerow(i)
 			
-			filewriter.writerow([''])
-			filewriter.writerow([''])
+			#filewriter.writerow([''])
+			#filewriter.writerow([''])
 			
 			colNames = ['Strategy Name']
 			#colNames.extend([i[0] for i in attributes])

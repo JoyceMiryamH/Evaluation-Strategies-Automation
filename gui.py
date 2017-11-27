@@ -1,8 +1,5 @@
 # pour créer un executable Windows qui marche http://www.pyinstaller.org/
 
-# TO BE IMPLEMENTED
-    # sélection du time span (année de départ, année de fin, temporalité)
-
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from tkinter import *
@@ -36,7 +33,7 @@ class Window:
 		self.choice3=Label(root, text="Time span: " ).grid(row=3, column=1, sticky = E)
 		self.value = StringVar(root)
 		self.value.set('year')
-		self.bar3=OptionMenu(root, self.value, 'day', 'month', 'trimester', 'semester', 'year')
+		self.bar3=OptionMenu(root, self.value, 'day', 'month', 'quarter', 'bi-annual', 'year')
 		self.bar3.grid(row=3, column=2, columnspan=2, padx = 10, sticky = W+E)
 		
 		# la cinquième ligne qui est affichée en 4e, pour le choix des années concernées

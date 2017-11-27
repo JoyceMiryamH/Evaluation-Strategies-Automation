@@ -35,8 +35,8 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 	elif (src.split('.')[-1] != "xlsx" or ind.split('.')[-1] != "xlsx"):
 		print("ERROR: The source and indicator files must have the \".xlsx\" extension. (must ")
 		print("          be in lowercase)")
-	elif not (tsp in ['day', 'month', 'trimester', 'semester', 'year']):
-		print("ERROR: The time span must be either 'day', 'month', 'trimester', 'semester' or")
+	elif not (tsp in ['day', 'month', 'quarter', 'bi-annual', 'year']):
+		print("ERROR: The time span must be either 'day', 'month', 'quarter', 'bi-annual' or")
 		print("          'year' (without the quotation marks).")
 	elif not (isInt(syr) and isInt(eyr)):
 		print("ERROR: The \"From / to:\" fields must both represent years, written as integers")
@@ -93,7 +93,7 @@ if (len(sys.argv) != 7 and not manual) or (sys.argv[1] == 'help'):
 	print("   sourcepath      The path to your data source file (e.g.: \"C:\\src.xlsx\" ).")
 	print("   indicatorpath   The path to your indicator file (same as above).")
 	print("   timespan        The time span you want to use to calculate your strategies.")
-	print("                      Must be either 'day', 'month', 'trimester', 'semester' or")
+	print("                      Must be either 'day', 'month', 'quarter', 'bi-annual' or")
 	print("                      'year' (without the quotation marks).")
 	print("   startyear       The first year for which you want to calculate strategies.")
 	print("   endyear         The last year for which you want to calculate strategies")
