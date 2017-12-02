@@ -25,28 +25,32 @@ def process(src, ind, tsp, syr, eyr, dst):
 # Method to check the validity of the values given as arguments
 def check(src, ind, tsp, syr, eyr, dst, mode):
 	if not (os.path.isfile(src)):
-		print("ERROR: Your first argument must be a valid file path (pointing to your")
+		print("\nERROR: Your first argument must be a valid file path (pointing to your")
 		print("          data source excel file).")
 	elif not (os.path.isfile(ind)):
-		print("ERROR: Your second argument must be a valid file path (pointing to your")
+		print("\nERROR: Your second argument must be a valid file path (pointing to your")
 		print("          indicator excel file).")
 	elif (src == ind):
-		print("ERROR: The source and indicator files must not be the same file.")
+		print("\nERROR: The source and indicator files must not be the same file.")
 	elif (src.split('.')[-1] != "xlsx" or ind.split('.')[-1] != "xlsx"):
-		print("ERROR: The source and indicator files must have the \".xlsx\" extension. (must ")
+		print("\nERROR: The source and indicator files must have the \".xlsx\" extension. (must ")
 		print("          be in lowercase)")
-	elif not (tsp in ['day', 'month', 'quarter', 'bi-annual', 'year']):
-		print("ERROR: The time span must be either 'day', 'month', 'quarter', 'bi-annual' or")
-		print("          'year' (without the quotation marks).")
+	elif not (tsp in ['day', 'month', 'quarter', 'bi-annual', 'year', '3years', '5years', '10years']):
+		print("\nERROR: The time span must be either 'day', 'month', 'quarter', 'bi-annual',")
+		print("          'year', '3years', '5years' or '10years' (without the quotation")
+		print("          marks).")
 	elif not (isInt(syr) and isInt(eyr)):
-		print("ERROR: The \"From / to:\" fields must both represent years, written as integers")
+		print("\nERROR: The \"From / to:\" fields must both represent years, written as integers")
 		print("          (no decimal value, no characters other than numbers).")
 	elif (syr > eyr):
-		print("ERROR: The second \"From / to:\" field must represent the last year of your time")
+		print("\nERROR: The second \"From / to:\" field must represent the last year of your time")
 		print("          span, while the first field represents the first year. The last year")
 		print("          cannot be set before the first year.")
+	elif ((tsp == '3years') and ((int(eyr) - int(syr)) < 2)) or ((tsp == '5years') and ((int(eyr) - int(syr)) < 4)) or ((tsp == '10years') and ((int(eyr) - int(syr)) < 9)):
+		print("\nERROR: The time span cannot be larger than the total time between the")
+		print("          beginning of the first year and the end of the last year.")
 	elif not (re.match("^[A-Za-z0-9\_\-\.]+$", dst)) or dst == ".":
-		print("ERROR: The strategies file name cannot contain any characters beside letters,")
+		print("\nERROR: The strategies file name cannot contain any characters beside letters,")
 		print("          numbers, underscores, dashes and points.")
 	else:
 		try:
@@ -66,13 +70,13 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 									return 0
 						return 1
 					else:
-						print(indicator_state)
+						print("\n", indicator_state, sep='')
 				except Exception:
-					print("ERROR: Indicator file is not an Excel file.")
+					print("\nERROR: Indicator file is not an Excel file.")
 			else:
 				print(source_state)
 		except Exception:
-			print("ERROR: Source file is not an Excel file.")
+			print("\nERROR: Source file is not an Excel file.")
 
 	return 0
 
@@ -93,8 +97,9 @@ if (len(sys.argv) != 7 and not manual) or (sys.argv[1] == 'help'):
 	print("   sourcepath      The path to your data source file (e.g.: \"C:\\src.xlsx\" ).")
 	print("   indicatorpath   The path to your indicator file (same as above).")
 	print("   timespan        The time span you want to use to calculate your strategies.")
-	print("                      Must be either 'day', 'month', 'quarter', 'bi-annual' or")
-	print("                      'year' (without the quotation marks).")
+	print("                      Must be either 'day', 'month', 'quarter', 'bi-annual',")
+	print("                      'year', '3years', '5years' or '10years' (without the")
+	print("                      quotation marks).")
 	print("   startyear       The first year for which you want to calculate strategies.")
 	print("   endyear         The last year for which you want to calculate strategies")
 	print("                      (inclusively).")

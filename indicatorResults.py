@@ -17,7 +17,13 @@ class INDICATORRESULTS():
 	def get_delimitation_dates(self, startYear, endYear, timespan):
 		current = dt.date(startYear, 1, 1)
 
-		if (timespan == 'year'):
+		if (timespan == '10years'):
+			date_increment = relativedelta(years=10)
+		elif (timespan == '5years'):
+			date_increment = relativedelta(years=5)
+		elif (timespan == '3years'):
+			date_increment = relativedelta(years=3)
+		elif (timespan == 'year'):
 			date_increment = relativedelta(years=1)
 		elif (timespan == 'bi-annual'):
 			date_increment = relativedelta(months=6)
@@ -84,6 +90,12 @@ class INDICATORRESULTS():
 		date = date_full.split('-')
 		if (timespan == 'year'):
 			periodname = date[0]
+		elif (timespan == '3years'):
+			periodname = date[0] + '-' + str(int(date[0])+2)
+		elif (timespan == '5years'):
+			periodname = date[0] + '-' + str(int(date[0])+4)
+		elif (timespan == '10years'):
+			periodname = date[0] + '-' + str(int(date[0])+9)
 		elif (timespan == 'bi-annual'):
 			if (int(date[1]) < 6):
 				periodname = 'S1 ' + date[0]

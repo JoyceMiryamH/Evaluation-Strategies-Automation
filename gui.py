@@ -34,7 +34,7 @@ class Window:
 		self.choice3=Label(root, text="Time span: " ).grid(row=3, column=1, sticky = E)
 		self.value = StringVar(root)
 		self.value.set('year')
-		self.bar3=OptionMenu(root, self.value, 'day', 'month', 'quarter', 'bi-annual', 'year')
+		self.bar3=OptionMenu(root, self.value, 'day', 'month', 'quarter', 'bi-annual', 'year', '3years', '5years', '10years')
 		self.bar3.grid(row=3, column=2, columnspan=2, padx = 10, sticky = W+E)
 
 		# The fifth line (displayed in 4th place), for the choice of the select years (or other time value)
@@ -91,6 +91,9 @@ class Window:
 	# Method for checking the arguments and files, and send back feedback on them
 	# The 'mode' argument can be set to 'silent' if we do not wish to put anything in the window excluding errors, which is useful for a last check before rolling
 	def preliminaryCheck(self, mode):
+		syr = int(self.bar5dot1.get())
+		eyr = int(self.bar5dot2.get())
+		tsp = self.value.get()
 		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""or self.bar5dot1.get() == ""or self.bar5dot2.get() == ""):
 			self.newText("ERROR: Please fill in required fields (i.e, all of them).", "red")
 			status = 0
@@ -105,6 +108,9 @@ class Window:
 			status = 0
 		elif (self.bar5dot1.get() > self.bar5dot2.get()):
 			self.newText("ERROR: The second \"From / to:\" field must represent the last year of your time span, while the first field represents the first year. The last year cannot be set before the first year.", "red")
+			status = 0
+		elif ((tsp == '3years') and ((eyr - syr) < 2)) or ((tsp == '5years') and ((eyr - syr) < 4)) or ((tsp == '10years') and ((eyr - syr) < 9)):
+			self.newText("ERROR: The time span cannot be larger than the total time between the beginning of the first year and the end of the last year.", "red")
 			status = 0
 		elif not (re.match("^[A-Za-z0-9\_\-\.]+$", self.bar4.get())) or self.bar4.get() == ".":
 			self.newText("ERROR: The strategies file name cannot contain any characters beside letters, numbers, underscores, dashes and points.", "red")
