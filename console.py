@@ -4,7 +4,7 @@ import re
 from preliminaryCheck import PreliminaryCheck as pc
 from indicatorResults import INDICATORRESULTS as ir
 
-# méthode pour simplifier la vérification des années en argument
+# Method to simplify checking the values of the years given as arguments
 def isInt(s):
 	try:
 		int(s)
@@ -12,7 +12,7 @@ def isInt(s):
 	except ValueError:
 		return False
 
-
+# Method to process the checked files (does a last check just in case the user is modifying the file while processing it)
 def process(src, ind, tsp, syr, eyr, dst):
 	if check(src, ind, tsp, syr, eyr, dst, "silent"):
 		if (dst.split('.')[-1] != "csv" or len(dst.split('.')) == 1):
@@ -22,7 +22,7 @@ def process(src, ind, tsp, syr, eyr, dst):
 		print("Note: please don't manipulate the source and indicator files while running")
 		print("          this program.")
 
-# méthode pour vérifier la validité des arguments
+# Method to check the validity of the values given as arguments
 def check(src, ind, tsp, syr, eyr, dst, mode):
 	if not (os.path.isfile(src)):
 		print("ERROR: Your first argument must be a valid file path (pointing to your")
@@ -35,8 +35,8 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 	elif (src.split('.')[-1] != "xlsx" or ind.split('.')[-1] != "xlsx"):
 		print("ERROR: The source and indicator files must have the \".xlsx\" extension. (must ")
 		print("          be in lowercase)")
-	elif not (tsp in ['day', 'month', 'trimester', 'semester', 'year']):
-		print("ERROR: The time span must be either 'day', 'month', 'trimester', 'semester' or")
+	elif not (tsp in ['day', 'month', 'quarter', 'bi-annual', 'year']):
+		print("ERROR: The time span must be either 'day', 'month', 'quarter', 'bi-annual' or")
 		print("          'year' (without the quotation marks).")
 	elif not (isInt(syr) and isInt(eyr)):
 		print("ERROR: The \"From / to:\" fields must both represent years, written as integers")
@@ -73,14 +73,14 @@ def check(src, ind, tsp, syr, eyr, dst, mode):
 				print(source_state)
 		except Exception:
 			print("ERROR: Source file is not an Excel file.")
-			
+
 	return 0
 
 
 manual = 0
 if (len(sys.argv) == 8):
 	if sys.argv[7] == '--m':
-		manual = 1	
+		manual = 1
 
 if (len(sys.argv) != 7 and not manual) or (sys.argv[1] == 'help'):
 
@@ -88,18 +88,18 @@ if (len(sys.argv) != 7 and not manual) or (sys.argv[1] == 'help'):
 	print("          your command the following way, with all the following arguments.")
 	print("   console.py <sourcepath> <indicatorpath> <timespan> <startyear> <endyear>")
 	print("                 <destination> [--m]\n")
-	
+
 	print("Here are the arguments you have to use:")
 	print("   sourcepath      The path to your data source file (e.g.: \"C:\\src.xlsx\" ).")
 	print("   indicatorpath   The path to your indicator file (same as above).")
 	print("   timespan        The time span you want to use to calculate your strategies.")
-	print("                      Must be either 'day', 'month', 'trimester', 'semester' or")
+	print("                      Must be either 'day', 'month', 'quarter', 'bi-annual' or")
 	print("                      'year' (without the quotation marks).")
 	print("   startyear       The first year for which you want to calculate strategies.")
 	print("   endyear         The last year for which you want to calculate strategies")
 	print("                      (inclusively).")
 	print("   destination     The name you want to use for the resulting strategies file.\n")
-	
+
 	print("Here is an optional argument that you may add after the mandatory ones:")
 	print("   --m             To enable manual validation of found indicators.")
 else:
