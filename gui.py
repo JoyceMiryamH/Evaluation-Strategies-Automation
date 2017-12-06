@@ -91,9 +91,6 @@ class Window:
 	# Method for checking the arguments and files, and send back feedback on them
 	# The 'mode' argument can be set to 'silent' if we do not wish to put anything in the window excluding errors, which is useful for a last check before rolling
 	def preliminaryCheck(self, mode):
-		syr = int(self.bar5dot1.get())
-		eyr = int(self.bar5dot2.get())
-		tsp = self.value.get()
 		if (self.filenames[0] == "" or self.filenames[1] == "" or self.bar4.get() == ""or self.bar5dot1.get() == ""or self.bar5dot2.get() == ""):
 			self.newText("ERROR: Please fill in required fields (i.e, all of them).", "red")
 			status = 0
@@ -109,7 +106,7 @@ class Window:
 		elif (self.bar5dot1.get() > self.bar5dot2.get()):
 			self.newText("ERROR: The second \"From / to:\" field must represent the last year of your time span, while the first field represents the first year. The last year cannot be set before the first year.", "red")
 			status = 0
-		elif ((tsp == '3years') and ((eyr - syr) < 2)) or ((tsp == '5years') and ((eyr - syr) < 4)) or ((tsp == '10years') and ((eyr - syr) < 9)):
+		elif ((self.value.get() == '3years') and ((int(self.bar5dot2.get()) - int(self.bar5dot1.get())) < 2)) or ((self.value.get() == '5years') and ((int(self.bar5dot2.get()) - int(self.bar5dot1.get())) < 4)) or ((self.value.get() == '10years') and ((int(self.bar5dot2.get()) - int(self.bar5dot1.get())) < 9)):
 			self.newText("ERROR: The time span cannot be larger than the total time between the beginning of the first year and the end of the last year.", "red")
 			status = 0
 		elif not (re.match("^[A-Za-z0-9\_\-\.]+$", self.bar4.get())) or self.bar4.get() == ".":
